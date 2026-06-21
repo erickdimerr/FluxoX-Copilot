@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fluxox-postgres
+    environment:
+      POSTGRES_USER: fluxox
+      POSTGRES_PASSWORD: fluxox
+      POSTGRES_DB: fluxox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

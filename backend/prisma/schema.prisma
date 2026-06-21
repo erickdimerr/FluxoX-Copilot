@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String               @id @default(uuid())
+  email       String               @unique
+  name        String?
+  createdAt   DateTime             @default(now())
+  flows       Flow[]
+  connections WhatsappConnection[]
+}
+
+model Flow {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+  automationType    String
+  name              String
+  status            String            @default("draft")
+  triggerEvent      String
+  triggerDelayUnit  String
+  triggerDelayValue Int
+  webhookToken      String            @unique @default(uuid())
+  nodes             Json              @default("[]")
+  startNodeId       String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  chatHistory       FlowChatMessage[]
+  runs              FlowRun[]
+}
+
+model FlowChatMessage {
+  id        String   @id @default(uuid())
+  flowId    String
+  flow      Flow     @relation(fields: [flowId], references: [id])
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model WhatsappConnection {
+  id                    String   @id @default(uuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id])
+  name                  String
+  providerType          String
+  status                String   @default("pending")
+  evolutionInstanceName String?
+  createdAt             DateTime @default(now())
+}
+
+model FlowRun {
+  id            String   @id @default(uuid())
+  flowId        String
+  flow          Flow     @relation(fields: [flowId], references: [id])
+  status        String   @default("running")
+  currentNodeId String?
+  context       Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
