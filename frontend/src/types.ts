@@ -16,14 +16,29 @@ export interface AIOption {
 
 export type AIInputType = "options" | "text" | "confirmation";
 
-export interface FlowNode {
+export interface ActionNode {
   id: string;
-  type: "action" | "condition" | "delay";
-  channel?: string;
-  config: Record<string, any>;
+  type: "action";
+  channel: string;
+  config: { message_template?: string; [key: string]: any };
   next?: string;
-  branches?: { true: string; false: string };
 }
+
+export interface ConditionNode {
+  id: string;
+  type: "condition";
+  config: { check: string; wait: { value: number; unit: string }; [key: string]: any };
+  branches: { true: string; false: string };
+}
+
+export interface DelayNode {
+  id: string;
+  type: "delay";
+  config: { value: number; unit: string; [key: string]: any };
+  next?: string;
+}
+
+export type FlowNode = ActionNode | ConditionNode | DelayNode;
 
 export interface Flow {
   flow_id: string;
@@ -44,15 +59,23 @@ export interface Flow {
 
 export interface AIChatResponse {
   message: string;
+  tip?: string;
   input_type: AIInputType;
   options?: AIOption[];
   flow: Flow;
   flow_complete: boolean;
 }
 
+export interface FlowEvaluation {
+  score: number;
+  strengths: string[];
+  improvements: string[];
+}
+
 export interface ChatBubble {
   role: "user" | "assistant";
   text: string;
+  isTip?: boolean;
 }
 
 export type ConnectionStatus = "connected" | "disconnected" | "pending";

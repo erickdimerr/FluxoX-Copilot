@@ -4,11 +4,13 @@ import { FlowList } from "./pages/FlowList";
 import { ChatPage } from "./pages/ChatPage";
 import { WebhookSetupPage } from "./pages/WebhookSetupPage";
 import { ConnectionsPage } from "./pages/ConnectionsPage";
+import { IntegrationPage } from "./pages/IntegrationPage";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
+      <Route path="/integracoes" element={<IntegrationPage />} />
       <Route path="/automacao/:typeId" element={<FlowList />} />
       <Route path="/automacao/:typeId/webhook/:sessionId" element={<WebhookSetupPage />} />
       <Route path="/automacao/:typeId/chat/:sessionId" element={<ChatPage />} />

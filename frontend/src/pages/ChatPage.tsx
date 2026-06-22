@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ChatPanel } from "../components/ChatPanel";
 import { FlowView } from "../components/FlowView";
-import { AIChatResponse, AIInputType, AIOption, ChatBubble, Flow } from "../types";
+import { AIChatResponse, AIInputType, AIOption, ChatBubble, Flow, FlowEvaluation } from "../types";
 
 const API_URL = "http://localhost:3001";
 
@@ -33,6 +33,9 @@ export function ChatPage() {
   const [textInput, setTextInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [flowComplete, setFlowComplete] = useState(false);
+  const [evaluation, setEvaluation] = useState<FlowEvaluation | null>(null);
+  const [evaluating, setEvaluating] = useState(false);
+  const [activating, setActivating] = useState(false);
   const [showWebhookModal, setShowWebhookModal] = useState(false);
   const [webhookCopied, setWebhookCopied] = useState(false);
 
@@ -63,12 +66,39 @@ export function ChatPage() {
 
     const data: AIChatResponse = await res.json();
 
-    setMessages((prev) => [...prev, { role: "assistant", text: data.message }]);
+    setMessages((prev) => {
+      const next: ChatBubble[] = [...prev, { role: "assistant", text: data.message }];
+      if (data.tip) {
+        next.push({ role: "assistant", text: data.tip, isTip: true });
+      }
+      return next;
+    });
     setFlow(data.flow);
     setInputType(data.input_type);
     setOptions(data.options);
-    setFlowComplete(data.flow_complete);
     setLoading(false);
+
+    if (data.flow_complete && !flowComplete) {
+      setFlowComplete(true);
+      setEvaluating(true);
+      try {
+        const evalRes = await fetch(`${API_URL}/api/flows/${sessionId}/evaluate`, {
+          method: "POST",
+        });
+        const evalData: FlowEvaluation = await evalRes.json();
+        setEvaluation(evalData);
+      } finally {
+        setEvaluating(false);
+      }
+    }
+  }
+
+  async function handleActivate() {
+    if (!flow) return;
+    setActivating(true);
+    await fetch(`${API_URL}/api/flows/${flow.flow_id}/activate`, { method: "PATCH" });
+    setActivating(false);
+    navigate(`/automacao/${typeId}`);
   }
 
   async function copyWebhookUrl() {
@@ -95,16 +125,75 @@ export function ChatPage() {
 
         <ChatPanel
           messages={messages}
-          options={options}
-          inputType={inputType}
+          options={flowComplete ? undefined : options}
+          inputType={flowComplete ? "text" : inputType}
           textInput={textInput}
           onTextInputChange={setTextInput}
           onSend={(value, label) => sendMessage(value, label ?? value)}
           loading={loading}
+          disabled={flowComplete}
         />
 
         {flowComplete && (
-          <div className="finish-banner">✅ Fluxo concluído! Pronto para publicar.</div>
+          <div className="eval-panel">
+            {evaluating && (
+              <div className="eval-loading">
+                <span className="eval-spinner" />
+                Avaliando seu fluxo com IA...
+              </div>
+            )}
+            {evaluation && (
+              <>
+                <div className="eval-header">
+                  <span className="eval-title">Avaliação do Fluxo</span>
+                  <span
+                    className={`eval-score-badge ${
+                      evaluation.score >= 75
+                        ? "score-high"
+                        : evaluation.score >= 50
+                        ? "score-mid"
+                        : "score-low"
+                    }`}
+                  >
+                    {evaluation.score}%
+                  </span>
+                </div>
+                <div className="eval-bar-track">
+                  <div
+                    className="eval-bar-fill"
+                    style={{ width: `${evaluation.score}%` }}
+                  />
+                </div>
+                {evaluation.strengths.length > 0 && (
+                  <div className="eval-section">
+                    <div className="eval-section-title">✅ Pontos fortes</div>
+                    {evaluation.strengths.map((s, i) => (
+                      <div key={i} className="eval-item">
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {evaluation.improvements.length > 0 && (
+                  <div className="eval-section">
+                    <div className="eval-section-title">💡 O que melhorar</div>
+                    {evaluation.improvements.map((s, i) => (
+                      <div key={i} className="eval-item">
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  className="activate-eval-btn"
+                  onClick={handleActivate}
+                  disabled={activating}
+                >
+                  {activating ? "Ativando..." : "⚡ Ativar este fluxo"}
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 

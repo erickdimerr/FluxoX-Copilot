@@ -1,0 +1,497 @@
+{
+  "info": {
+    "name": "FluxoX — Webhook Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3001" },
+    { "key": "token", "value": "COLE_SEU_TOKEN_AQUI" }
+  ],
+  "item": [
+    {
+      "name": "0. Obter URLs de Webhook",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/integration",
+        "description": "Retorna as URLs por plataforma e o mapeamento de eventos. Copie o token da URL e cole na variável 'token' da collection."
+      }
+    },
+    {
+      "name": "Hotmart",
+      "item": [
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/hotmart",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"ABANDONED_CART\",\n  \"data\": {\n    \"buyer\": {\n      \"name\": \"Maria Oliveira\",\n      \"email\": \"maria@email.com\",\n      \"phone\": \"11988880000\"\n    },\n    \"purchase\": {\n      \"order_key\": \"HM-CART-001\",\n      \"price\": { \"value\": 197.00 }\n    },\n    \"product\": {\n      \"name\": \"Curso de Copywriting\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/hotmart",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"PURCHASE_APPROVED\",\n  \"data\": {\n    \"buyer\": {\n      \"name\": \"João da Silva\",\n      \"email\": \"joao@email.com\",\n      \"phone\": \"11999990000\"\n    },\n    \"purchase\": {\n      \"order_key\": \"HM-12345\",\n      \"price\": { \"value\": 297.00 }\n    },\n    \"product\": {\n      \"name\": \"Curso de Marketing Digital\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Rastreio Enviado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/hotmart",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"PURCHASE_SHIPPED\",\n  \"data\": {\n    \"buyer\": {\n      \"name\": \"João da Silva\",\n      \"email\": \"joao@email.com\",\n      \"phone\": \"11999990000\"\n    },\n    \"purchase\": {\n      \"order_key\": \"HM-12345\",\n      \"price\": { \"value\": 297.00 },\n      \"shipping_details\": {\n        \"tracking_code\": \"BR123456789BR\"\n      }\n    },\n    \"product\": {\n      \"name\": \"Curso de Marketing Digital\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação PIX",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/hotmart",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"PURCHASE_PIX_CHARGEBACK\",\n  \"data\": {\n    \"buyer\": {\n      \"name\": \"Ana Costa\",\n      \"email\": \"ana@email.com\",\n      \"phone\": \"21977770000\"\n    },\n    \"purchase\": {\n      \"order_key\": \"HM-PIX-001\",\n      \"price\": { \"value\": 97.00 }\n    },\n    \"product\": {\n      \"name\": \"Ebook de Vendas\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação Boleto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/hotmart",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"PURCHASE_BILLET_PRINTED\",\n  \"data\": {\n    \"buyer\": {\n      \"name\": \"Carlos Mendes\",\n      \"email\": \"carlos@email.com\",\n      \"phone\": \"31966660000\"\n    },\n    \"purchase\": {\n      \"order_key\": \"HM-BOL-001\",\n      \"price\": { \"value\": 147.00 }\n    },\n    \"product\": {\n      \"name\": \"Mentoria de Negócios\"\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kiwify",
+      "item": [
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/kiwify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.abandoned\",\n  \"order_id\": \"KW-CART-001\",\n  \"sale_amount\": 19700,\n  \"Customer\": {\n    \"full_name\": \"Fernanda Lima\",\n    \"email\": \"fernanda@email.com\",\n    \"mobile\": \"11955550000\"\n  },\n  \"Product\": { \"name\": \"Planner Digital\" }\n}"
+            }
+          }
+        },
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/kiwify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.paid\",\n  \"order_id\": \"KW-12345\",\n  \"sale_amount\": 29700,\n  \"Customer\": {\n    \"full_name\": \"Roberto Alves\",\n    \"email\": \"roberto@email.com\",\n    \"mobile\": \"11944440000\"\n  },\n  \"Product\": { \"name\": \"Curso de Finanças\" },\n  \"payment\": {\n    \"pix_code\": null,\n    \"boleto_url\": null\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Rastreio Enviado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/kiwify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.shipped\",\n  \"order_id\": \"KW-12345\",\n  \"sale_amount\": 29700,\n  \"Customer\": {\n    \"full_name\": \"Roberto Alves\",\n    \"email\": \"roberto@email.com\",\n    \"mobile\": \"11944440000\"\n  },\n  \"Product\": { \"name\": \"Curso de Finanças\" },\n  \"Shipping\": { \"tracking_code\": \"KW987654321BR\" }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação PIX",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/kiwify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.pix_expired\",\n  \"order_id\": \"KW-PIX-001\",\n  \"sale_amount\": 9700,\n  \"Customer\": {\n    \"full_name\": \"Patrícia Rocha\",\n    \"email\": \"patricia@email.com\",\n    \"mobile\": \"21933330000\"\n  },\n  \"Product\": { \"name\": \"Pack de Templates\" },\n  \"payment\": {\n    \"pix_code\": \"00020126580014BR.GOV.BCB.PIX0136abc123\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação Boleto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/kiwify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.boleto_expired\",\n  \"order_id\": \"KW-BOL-001\",\n  \"sale_amount\": 14700,\n  \"Customer\": {\n    \"full_name\": \"Lucas Ferreira\",\n    \"email\": \"lucas@email.com\",\n    \"mobile\": \"31922220000\"\n  },\n  \"Product\": { \"name\": \"Curso de Excel\" },\n  \"payment\": {\n    \"boleto_url\": \"https://boleto.exemplo.com/kw-bol-001\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopify",
+      "item": [
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/shopify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"checkout/create\",\n  \"id\": \"shop-cart-001\",\n  \"name\": \"#D001\",\n  \"email\": \"bruno@email.com\",\n  \"total_price\": \"350.00\",\n  \"customer\": {\n    \"first_name\": \"Bruno\",\n    \"last_name\": \"Santos\",\n    \"email\": \"bruno@email.com\",\n    \"phone\": \"+5511988881111\"\n  },\n  \"line_items\": [\n    { \"title\": \"Camiseta Premium Preta\" }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/shopify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"orders/paid\",\n  \"id\": \"shop-order-001\",\n  \"name\": \"#1001\",\n  \"email\": \"julia@email.com\",\n  \"total_price\": \"289.90\",\n  \"customer\": {\n    \"first_name\": \"Julia\",\n    \"last_name\": \"Martins\",\n    \"email\": \"julia@email.com\",\n    \"phone\": \"+5511977772222\"\n  },\n  \"line_items\": [\n    { \"title\": \"Tênis Running Pro\" }\n  ],\n  \"billing_address\": {\n    \"name\": \"Julia Martins\",\n    \"phone\": \"11977772222\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Rastreio Enviado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/shopify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"orders/fulfilled\",\n  \"id\": \"shop-order-001\",\n  \"name\": \"#1001\",\n  \"email\": \"julia@email.com\",\n  \"total_price\": \"289.90\",\n  \"customer\": {\n    \"first_name\": \"Julia\",\n    \"last_name\": \"Martins\",\n    \"phone\": \"11977772222\"\n  },\n  \"line_items\": [\n    { \"title\": \"Tênis Running Pro\" }\n  ],\n  \"fulfillments\": [\n    { \"tracking_number\": \"SP123456789BR\" }\n  ]\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appmax",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/appmax",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.approved\",\n  \"data\": {\n    \"id\": \"APX-99001\",\n    \"total\": 197.00,\n    \"customer\": {\n      \"name\": \"Thiago Pereira\",\n      \"email\": \"thiago@email.com\",\n      \"cellphone\": \"11966663333\"\n    },\n    \"products\": [\n      { \"name\": \"Suplemento Whey 1kg\" }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação PIX",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/appmax",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.pix_expired\",\n  \"data\": {\n    \"id\": \"APX-PIX-001\",\n    \"total\": 197.00,\n    \"customer\": {\n      \"name\": \"Sabrina Nunes\",\n      \"email\": \"sabrina@email.com\",\n      \"cellphone\": \"11955554444\"\n    },\n    \"products\": [\n      { \"name\": \"Suplemento Whey 1kg\" }\n    ],\n    \"payment\": {\n      \"pix_code\": \"00020126580014BR.GOV.BCB.PIX0136def456\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação Boleto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/appmax",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.boleto_expired\",\n  \"data\": {\n    \"id\": \"APX-BOL-001\",\n    \"total\": 197.00,\n    \"customer\": {\n      \"name\": \"Diego Ramos\",\n      \"email\": \"diego@email.com\",\n      \"cellphone\": \"11944445555\"\n    },\n    \"products\": [\n      { \"name\": \"Kit Proteína\" }\n    ],\n    \"payment\": {\n      \"boleto_url\": \"https://boleto.appmax.com.br/apx-bol-001\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/appmax",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.abandoned\",\n  \"data\": {\n    \"id\": \"APX-CART-001\",\n    \"total\": 197.00,\n    \"customer\": {\n      \"name\": \"Camila Torres\",\n      \"email\": \"camila@email.com\",\n      \"cellphone\": \"11933336666\"\n    },\n    \"products\": [\n      { \"name\": \"Creatina Monoidratada\" }\n    ]\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eduzz",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/eduzz",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"SALE_APPROVED\",\n  \"data\": {\n    \"client_name\": \"Amanda Sousa\",\n    \"client_email\": \"amanda@email.com\",\n    \"client_cellphone\": \"11922227777\",\n    \"invoice_key\": \"EDZ-55001\",\n    \"total\": 397.00,\n    \"product_name\": \"Formação de Coach\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/eduzz",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"ABANDONED_CART\",\n  \"data\": {\n    \"client_name\": \"Renato Gomes\",\n    \"client_email\": \"renato@email.com\",\n    \"client_cellphone\": \"11911118888\",\n    \"invoice_key\": \"EDZ-CART-001\",\n    \"total\": 297.00,\n    \"product_name\": \"MBA em Gestão\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Rastreio Enviado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/eduzz",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"SALE_SHIPPED\",\n  \"data\": {\n    \"client_name\": \"Amanda Sousa\",\n    \"client_email\": \"amanda@email.com\",\n    \"client_cellphone\": \"11922227777\",\n    \"invoice_key\": \"EDZ-55001\",\n    \"total\": 397.00,\n    \"product_name\": \"Formação de Coach\",\n    \"tracking_code\": \"ED112233BR\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Monetizze",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/monetizze",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoPostback\": \"venda_aprovada\",\n  \"comprador\": {\n    \"nome\": \"Isabel Castro\",\n    \"email\": \"isabel@email.com\",\n    \"telefone\": \"11900009999\"\n  },\n  \"produto\": {\n    \"nome\": \"Masterclass de Liderança\",\n    \"valor\": 497.00\n  },\n  \"venda\": {\n    \"codigo\": \"MNZ-77001\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação PIX",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/monetizze",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoPostback\": \"pix_nao_pago\",\n  \"comprador\": {\n    \"nome\": \"Marcos Vieira\",\n    \"email\": \"marcos@email.com\",\n    \"telefone\": \"11988881234\"\n  },\n  \"produto\": {\n    \"nome\": \"Masterclass de Liderança\",\n    \"valor\": 497.00\n  },\n  \"venda\": {\n    \"codigo\": \"MNZ-PIX-001\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação Boleto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/monetizze",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoPostback\": \"boleto_nao_pago\",\n  \"comprador\": {\n    \"nome\": \"Helena Barbosa\",\n    \"email\": \"helena@email.com\",\n    \"telefone\": \"21977774321\"\n  },\n  \"produto\": {\n    \"nome\": \"Curso de Liderança\",\n    \"valor\": 297.00\n  },\n  \"venda\": {\n    \"codigo\": \"MNZ-BOL-001\",\n    \"boleto_url\": \"https://boleto.monetizze.com/mnz-bol-001\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "PerfectPay",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/perfectpay",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_status_enum\": \"PAID\",\n  \"customer_name\": \"Viviane Carmo\",\n  \"customer_email\": \"viviane@email.com\",\n  \"customer_phone\": \"31966661234\",\n  \"order_code\": \"PP-33001\",\n  \"sale_amount\": 197.00,\n  \"product_name\": \"Treinamento de Vendas\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/perfectpay",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_status_enum\": \"ABANDONED\",\n  \"customer_name\": \"Rodrigo Faria\",\n  \"customer_email\": \"rodrigo@email.com\",\n  \"customer_phone\": \"31955554321\",\n  \"order_code\": \"PP-CART-001\",\n  \"sale_amount\": 197.00,\n  \"product_name\": \"Treinamento de Vendas\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação PIX",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/perfectpay",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_status_enum\": \"PIX_EXPIRED\",\n  \"customer_name\": \"Carla Pinto\",\n  \"customer_email\": \"carla@email.com\",\n  \"customer_phone\": \"11944443210\",\n  \"order_code\": \"PP-PIX-001\",\n  \"sale_amount\": 97.00,\n  \"product_name\": \"E-book Avançado\",\n  \"pix_code\": \"00020126580014BR.GOV.BCB.PIX0136ghi789\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Recuperação Boleto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/perfectpay",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_status_enum\": \"BOLETO_EXPIRED\",\n  \"customer_name\": \"Gustavo Lima\",\n  \"customer_email\": \"gustavo@email.com\",\n  \"customer_phone\": \"11933330987\",\n  \"order_code\": \"PP-BOL-001\",\n  \"sale_amount\": 147.00,\n  \"product_name\": \"Mentoria Intensiva\",\n  \"boleto_url\": \"https://boleto.perfectpay.com/pp-bol-001\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Braip",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/braip",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"sale_approved\",\n  \"customer\": {\n    \"name\": \"Aline Freitas\",\n    \"email\": \"aline@email.com\",\n    \"phone\": \"11922220000\"\n  },\n  \"product\": { \"name\": \"Curso de Instagram\" },\n  \"sale\": {\n    \"code\": \"BP-44001\",\n    \"amount\": 19700\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/braip",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"abandoned_cart\",\n  \"customer\": {\n    \"name\": \"Pedro Leal\",\n    \"email\": \"pedro@email.com\",\n    \"phone\": \"11911110000\"\n  },\n  \"product\": { \"name\": \"Curso de TikTok\" },\n  \"sale\": {\n    \"code\": \"BP-CART-001\",\n    \"amount\": 14700\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CartPanda",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/cartpanda",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order/paid\",\n  \"order\": {\n    \"id\": \"CP-66001\",\n    \"total\": 259.90,\n    \"email\": \"tiago@email.com\",\n    \"customer\": {\n      \"name\": \"Tiago Monteiro\",\n      \"email\": \"tiago@email.com\",\n      \"phone\": \"11900001111\"\n    },\n    \"line_items\": [\n      { \"title\": \"Mochila Impermeável\" }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Carrinho Abandonado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/cartpanda",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"checkout/abandoned\",\n  \"order\": {\n    \"id\": \"CP-CART-001\",\n    \"total\": 259.90,\n    \"email\": \"larissa@email.com\",\n    \"customer\": {\n      \"name\": \"Larissa Campos\",\n      \"email\": \"larissa@email.com\",\n      \"phone\": \"11899992222\"\n    },\n    \"line_items\": [\n      { \"title\": \"Mochila Notebook\" }\n    ]\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Yampi",
+      "item": [
+        {
+          "name": "Pedido Pago",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/yampi",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.paid\",\n  \"resource\": {\n    \"id\": \"YMP-88001\",\n    \"number\": \"YMP-88001\",\n    \"value\": 189.90,\n    \"tracking_code\": null,\n    \"customer\": {\n      \"data\": {\n        \"first_name\": \"Eduardo\",\n        \"last_name\": \"Siqueira\",\n        \"email\": \"eduardo@email.com\",\n        \"phones\": [\n          { \"ddd\": \"11\", \"number\": \"987653333\" }\n        ]\n      }\n    },\n    \"items\": {\n      \"data\": [\n        {\n          \"product\": { \"name\": \"Relógio Smartband\" }\n        }\n      ]\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Rastreio Enviado",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/yampi",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.shipped\",\n  \"resource\": {\n    \"id\": \"YMP-88001\",\n    \"number\": \"YMP-88001\",\n    \"value\": 189.90,\n    \"tracking_code\": \"YM445566BR\",\n    \"customer\": {\n      \"data\": {\n        \"first_name\": \"Eduardo\",\n        \"last_name\": \"Siqueira\",\n        \"email\": \"eduardo@email.com\",\n        \"phones\": [\n          { \"ddd\": \"11\", \"number\": \"987653333\" }\n        ]\n      }\n    },\n    \"items\": {\n      \"data\": [\n        {\n          \"product\": { \"name\": \"Relógio Smartband\" }\n        }\n      ]\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deduplicação — Teste Duplo Disparo",
+      "item": [
+        {
+          "name": "1. Shopify dispara Pedido Pago (primeiro)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/shopify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"orders/paid\",\n  \"name\": \"#2001\",\n  \"email\": \"duplo@email.com\",\n  \"total_price\": \"199.90\",\n  \"customer\": {\n    \"first_name\": \"Cliente\",\n    \"last_name\": \"Dedup\",\n    \"phone\": \"11900002001\"\n  },\n  \"line_items\": [{ \"title\": \"Produto Teste\" }]\n}",
+              "description": "Envia primeiro. Deve retornar executed: false, flowId presente."
+            }
+          }
+        },
+        {
+          "name": "2. Appmax dispara Pedido Pago (mesmo cliente — deve deduplicar)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/webhook/receive/{{token}}/appmax",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"order.approved\",\n  \"data\": {\n    \"id\": \"APX-2001\",\n    \"total\": 199.90,\n    \"customer\": {\n      \"name\": \"Cliente Dedup\",\n      \"email\": \"duplo@email.com\",\n      \"cellphone\": \"11900002001\"\n    },\n    \"products\": [{ \"name\": \"Produto Teste\" }]\n  }\n}",
+              "description": "Envia logo após o request 1. Deve retornar deduplicated: true."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

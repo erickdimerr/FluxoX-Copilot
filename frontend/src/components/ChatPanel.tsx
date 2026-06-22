@@ -8,6 +8,7 @@ interface Props {
   onTextInputChange: (value: string) => void;
   onSend: (value: string, label?: string) => void;
   loading: boolean;
+  disabled?: boolean;
 }
 
 export function ChatPanel({
@@ -18,19 +19,24 @@ export function ChatPanel({
   onTextInputChange,
   onSend,
   loading,
+  disabled = false,
 }: Props) {
   return (
     <div className="chat-panel">
       <div className="messages">
         {messages.map((m, i) => (
-          <div key={i} className={`bubble ${m.role}`}>
+          <div
+            key={i}
+            className={`bubble ${m.role}${m.isTip ? " tip" : ""}`}
+          >
+            {m.isTip && <span className="tip-icon">💡</span>}
             {m.text}
           </div>
         ))}
         {loading && <div className="bubble assistant loading">Digitando...</div>}
       </div>
 
-      <div className="input-area">
+      <div className={`input-area${disabled ? " input-disabled" : ""}`}>
         {inputType === "options" && options && (
           <div className="options">
             {options.map((opt) => (

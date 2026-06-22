@@ -30,9 +30,14 @@ export function Dashboard() {
             <h1>FluxoX</h1>
             <p>Escolha o tipo de automação que deseja criar</p>
           </div>
-          <button className="nav-connections-btn" onClick={() => navigate("/connections")}>
-            📱 Conexões
-          </button>
+          <div className="dashboard-nav-btns">
+            <button className="nav-connections-btn" onClick={() => navigate("/integracoes")}>
+              🔗 Integração
+            </button>
+            <button className="nav-connections-btn" onClick={() => navigate("/connections")}>
+              📱 Conexões
+            </button>
+          </div>
         </div>
       </header>
       <div className="type-grid">

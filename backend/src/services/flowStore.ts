@@ -74,6 +74,17 @@ export async function getFlowById(id: string): Promise<Flow | null> {
   return record ? toFlow(record) : null;
 }
 
+export async function activateFlow(flowId: string, automationType: string): Promise<void> {
+  await prisma.flow.updateMany({
+    where: { automationType, userId: DEFAULT_USER_ID, id: { not: flowId } },
+    data: { status: "paused" },
+  });
+  await prisma.flow.update({
+    where: { id: flowId },
+    data: { status: "active" },
+  });
+}
+
 // Atualiza updated_at no objeto em memória antes de salvar no banco
 export function touchFlow(flow: Flow): void {
   flow.updated_at = new Date().toISOString();

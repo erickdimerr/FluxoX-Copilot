@@ -1,10 +1,22 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { Flow, ChatMessage, AIChatResponse, AIOption } from "../types/flow.js";
+import { Flow, ChatMessage, AIChatResponse, AIOption, FlowEvaluation } from "../types/flow.js";
 import { flowTools } from "./flowTools.js";
 import { applyToolCall } from "./flowEngine.js";
 
 const anthropic = new Anthropic(); // usa ANTHROPIC_API_KEY do ambiente
 
+const TIP_INSTRUCTION = `
+
+Quando identificar uma oportunidade de melhoria importante no fluxo que o usuário está montando (ex: verificar se conversão já ocorreu, evitar spam, boas práticas de timing, mensagem de fallback), inclua uma dica no formato <tip>texto da dica</tip> APÓS sua mensagem principal. Use com moderação — no máximo uma dica por resposta, somente quando agregar valor real.`;
+
+function extractTip(text: string): { cleanText: string; tip?: string } {
+  const match = text.match(/<tip>([\s\S]*?)<\/tip>/);
+  if (!match) return { cleanText: text };
+  return {
+    cleanText: text.replace(/<tip>[\s\S]*?<\/tip>/, "").trim(),
+    tip: match[1].trim(),
+  };
+}
 
 function extractUiBlock(text: string): {
   cleanText: string;
@@ -43,6 +55,8 @@ export async function processChatMessage(
     { role: "user", content: userMessage },
   ];
 
+  const systemWithTip = systemPrompt + TIP_INSTRUCTION;
+
   let flowComplete = false;
   let finalText = "";
   let finalUi: { input_type: AIChatResponse["input_type"]; options?: AIOption[] } = {
@@ -55,7 +69,7 @@ export async function processChatMessage(
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
-      system: systemPrompt,
+      system: systemWithTip,
       tools: flowTools,
       messages,
     });
@@ -102,11 +116,41 @@ export async function processChatMessage(
     }
   }
 
+  const { cleanText, tip } = extractTip(finalText);
+
   return {
-    message: finalText,
+    message: cleanText,
+    tip,
     input_type: finalUi.input_type,
     options: finalUi.options,
     flow,
     flow_complete: flowComplete,
   };
+}
+
+export async function evaluateFlow(flow: Flow): Promise<FlowEvaluation> {
+  const prompt = `Você é um especialista em automação de marketing via WhatsApp. Avalie este fluxo de automação e retorne uma análise em JSON.
+
+Fluxo:
+${JSON.stringify(flow, null, 2)}
+
+Retorne APENAS um objeto JSON válido neste formato exato (sem markdown, sem texto fora do JSON):
+{
+  "score": <inteiro de 0 a 100 representando a qualidade do fluxo>,
+  "strengths": ["ponto forte 1", "ponto forte 2"],
+  "improvements": ["sugestão de melhoria 1", "sugestão de melhoria 2"]
+}`;
+
+  const response = await anthropic.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 512,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = response.content
+    .filter((b) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
+
+  return JSON.parse(text) as FlowEvaluation;
 }

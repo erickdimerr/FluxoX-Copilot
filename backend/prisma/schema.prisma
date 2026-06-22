@@ -8,12 +8,27 @@ datasource db {
 }
 
 model User {
-  id          String               @id @default(uuid())
-  email       String               @unique
-  name        String?
-  createdAt   DateTime             @default(now())
-  flows       Flow[]
-  connections WhatsappConnection[]
+  id           String               @id @default(uuid())
+  email        String               @unique
+  name         String?
+  webhookToken String               @unique @default(dbgenerated("gen_random_uuid()"))
+  createdAt    DateTime             @default(now())
+  flows        Flow[]
+  connections  WhatsappConnection[]
+  executions   FlowExecution[]
+}
+
+model FlowExecution {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  automationTypeId String
+  customerPhone    String
+  platform         String
+  flowId           String
+  executedAt       DateTime @default(now())
+
+  @@index([userId, automationTypeId, customerPhone, executedAt])
 }
 
 model Flow {

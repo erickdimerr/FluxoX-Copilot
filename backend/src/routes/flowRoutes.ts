@@ -1,8 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { automationTypes, getAutomationTypeById } from "../automationTypes.js";
-import { createEmptyFlow, storeFlow, updateStoredFlow, getFlowsByType } from "../services/flowStore.js";
+import { createEmptyFlow, storeFlow, updateStoredFlow, getFlowsByType, getFlowById, activateFlow } from "../services/flowStore.js";
 import { getSession, setSession } from "../services/sessionStore.js";
-import { processChatMessage } from "../services/aiService.js";
+import { processChatMessage, evaluateFlow } from "../services/aiService.js";
+import { prisma } from "../lib/prisma.js";
+import { DEFAULT_USER_ID } from "../lib/constants.js";
+import { detectEventType, EVENT_TYPE_MAP } from "../lib/eventMapping.js";
+import { parseWebhookPayload, SUPPORTED_PLATFORMS } from "../lib/platformParsers.js";
 import { v4 as uuidv4 } from "uuid";
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3001";
@@ -99,10 +103,114 @@ export async function flowRoutes(app: FastifyInstance) {
     });
   });
 
-  // Placeholder: recebe eventos do webhook
-  app.post("/webhook/receive/:token", async (req, reply) => {
-    const { token } = req.params as { token: string };
-    app.log.info({ token, payload: req.body }, "Webhook recebido");
-    return reply.send({ received: true });
+  // Ativa um fluxo e pausa os outros do mesmo tipo de automação
+  app.patch("/api/flows/:flowId/activate", async (req, reply) => {
+    const { flowId } = req.params as { flowId: string };
+    const flow = await getFlowById(flowId);
+    if (!flow) return reply.status(404).send({ error: "Fluxo não encontrado." });
+    await activateFlow(flowId, flow.automation_type_id);
+    return reply.send({ ok: true });
+  });
+
+  // Avalia o fluxo com IA e retorna score + pontos fortes + melhorias
+  app.post("/api/flows/:sessionId/evaluate", async (req, reply) => {
+    const { sessionId } = req.params as { sessionId: string };
+    const session = await getSession(sessionId);
+    if (!session) return reply.status(404).send({ error: "Sessão não encontrada." });
+    const evaluation = await evaluateFlow(session.flow);
+    return reply.send(evaluation);
+  });
+
+  // Retorna informações de integração: URL por plataforma + mapeamento de eventos
+  app.get("/api/integration", async (_req, reply) => {
+    const user = await prisma.user.findUnique({ where: { id: DEFAULT_USER_ID } });
+    if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });
+
+    const base = `${BASE_URL}/webhook/receive/${user.webhookToken}`;
+    return reply.send({
+      webhook_urls: Object.fromEntries(
+        SUPPORTED_PLATFORMS.map((p) => [p, `${base}/${p}`])
+      ),
+      event_mapping: EVENT_TYPE_MAP,
+    });
+  });
+
+  // Recebe eventos do webhook — URL inclui a plataforma para saber qual parser usar
+  app.post("/webhook/receive/:userToken/:platform", async (req, reply) => {
+    const { userToken, platform } = req.params as { userToken: string; platform: string };
+    const body = req.body as Record<string, unknown>;
+
+    if (!SUPPORTED_PLATFORMS.includes(platform)) {
+      return reply.status(400).send({ error: `Plataforma não suportada: ${platform}` });
+    }
+
+    const user = await prisma.user.findUnique({ where: { webhookToken: userToken } });
+    if (!user) {
+      app.log.warn({ userToken }, "Webhook recebido com token inválido");
+      return reply.status(404).send({ error: "Token inválido." });
+    }
+
+    const automationTypeId = detectEventType(body);
+    app.log.info({ userToken, platform, automationTypeId }, "Webhook recebido");
+
+    if (!automationTypeId) {
+      return reply.send({ received: true, matched: false, reason: "event_type não reconhecido" });
+    }
+
+    const activeFlow = await prisma.flow.findFirst({
+      where: { userId: user.id, automationType: automationTypeId, status: "active" },
+    });
+
+    if (!activeFlow) {
+      return reply.send({ received: true, matched: true, automationTypeId, executed: false, reason: "nenhum fluxo ativo" });
+    }
+
+    const normalized = parseWebhookPayload(platform, body);
+    const customerPhone = normalized?.customer_phone ?? null;
+
+    // Deduplicação: evita executar o mesmo fluxo duas vezes para o mesmo cliente
+    // quando múltiplas plataformas (ex: Shopify + Appmax) disparam o mesmo tipo de evento
+    if (customerPhone) {
+      const DEDUP_WINDOW_MS = 10 * 60 * 1000; // 10 minutos
+      const since = new Date(Date.now() - DEDUP_WINDOW_MS);
+
+      const duplicate = await prisma.flowExecution.findFirst({
+        where: {
+          userId: user.id,
+          automationTypeId,
+          customerPhone,
+          executedAt: { gte: since },
+        },
+      });
+
+      if (duplicate) {
+        app.log.info({ flowId: activeFlow.id, automationTypeId, platform, duplicateId: duplicate.id }, "Webhook deduplicado");
+        return reply.send({
+          received: true,
+          matched: true,
+          automationTypeId,
+          executed: false,
+          deduplicated: true,
+          reason: `Evento já processado pela plataforma "${duplicate.platform}" nos últimos 10 minutos`,
+        });
+      }
+
+      await prisma.flowExecution.create({
+        data: { userId: user.id, automationTypeId, customerPhone, platform, flowId: activeFlow.id },
+      });
+    }
+
+    app.log.info({ flowId: activeFlow.id, automationTypeId, platform, phone: customerPhone }, "Fluxo ativo encontrado — aguardando Flow Runner");
+
+    return reply.send({
+      received: true,
+      matched: true,
+      automationTypeId,
+      executed: false,
+      flowId: activeFlow.id,
+      customer: normalized
+        ? { name: normalized.customer_name, phone: normalized.customer_phone }
+        : null,
+    });
   });
 }

@@ -83,10 +83,17 @@ export type AIInputType = "options" | "text" | "confirmation";
 
 export interface AIChatResponse {
   message: string;
+  tip?: string;
   input_type: AIInputType;
   options?: AIOption[];
   flow: Flow; // estado atual do fluxo após processar a mensagem
   flow_complete: boolean;
+}
+
+export interface FlowEvaluation {
+  score: number;
+  strengths: string[];
+  improvements: string[];
 }
 
 export interface ChatMessage {
